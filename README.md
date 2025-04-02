@@ -1,6 +1,6 @@
 # A Guide for Configuring i3/Sway WM
 
-| When you mess something up, access tty using `<C-M,<F2 - F?>` (control alt F2).
+> When you mess something up, access tty using `<C-M,<F2 - F?>` (control alt F2).
 
 ## App Launcher
 
@@ -178,6 +178,11 @@ label = %date% %time%
 ; A1 Left click, A2 middle, A3 right click, A4 Scroll up, A5 scroll down, etc
 format = %{A1:notify-send "$(cal)"):}<label>%{A}
 ```
+
+To view the previous notification, use `dunstctl history-pop`.
+You can repeat this command until you get the desired notification.
+Newer version of dunst supports `dunstctl history`, which returns previous notifications as JSON format.
+The number of notification to be saved is controled by `history_length` variable in `dunstrc`.
 
 ## Polkit
 
