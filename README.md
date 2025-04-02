@@ -75,11 +75,11 @@ In Wayland, the compositor doubles as a window manager, meaning Sway is Wayland 
 
 ### i3
 
-Make `.Xresources` in your home (`~`) directory and append `Xft.dpi: <DPI-value>`. Most applications will follow the value specified in the DPI.
+Make `.Xresources` in your home (`~`) directory and append `Xft.dpi: <DPI-value>` (in percentage: e.g., `Xft.dpi: 120` for 120%). Most applications will follow the value specified in the DPI.
 
 ### Sway
 
-`swaymsg -t get_outputs`, add `output <output_name> scale <DPI-value>` to your config.
+`swaymsg -t get_outputs`, add `output <output_name> scale <DPI-value>` (in the scale: e.g, `output eDP-1 scale 1.2` for 120%) to your config.
 
 ## External Monitors
 
@@ -115,9 +115,17 @@ exec swayidle -w \
 
 You can of course customize behavior after idling.
 
-## Keyboard Settings
+## Keyboard: Getting Keycodes
 
-I don't know much about keyboard layout, but I know one thing: I don't like the location of the control key. Let's swap them with CapsLock. Emacs pinky is not a myth.
+### i3
+
+Install `xenv` and use the following command
+
+```
+xenv -event keyboard | egrep -o 'keycode.*\)'
+```
+
+## Keyboard: Switching Control and Caps Lock
 
 ### i3
 
