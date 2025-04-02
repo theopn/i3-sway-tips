@@ -79,7 +79,7 @@ Make `.Xresources` in your home (`~`) directory and append `Xft.dpi: <DPI-value>
 
 ### Sway
 
-I don't know.
+`swaymsg -t get_outputs`, add `output <output_name> scale <DPI-value>` to your config.
 
 ## External Monitors
 
@@ -168,6 +168,11 @@ label = %date% %time%
 ; A1 Left click, A2 middle, A3 right click, A4 Scroll up, A5 scroll down, etc
 format = %{A1:notify-send "$(cal)"):}<label>%{A}
 ```
+
+## Polkit
+
+Some GUI application that requires the Polkit authentication framework to work correctly (e.g., Fedora Media Writer) neeeds Polkit frontend installed.
+`lxpolkit` is a lightweight one you can use.
 
 ## Pulseaudio/Pipewire Volume Control
 
