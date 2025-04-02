@@ -1,5 +1,7 @@
 # A Guide for Configuring i3/Sway WM
 
+| When you mess something up, access tty using `<C-M,<F2 - F?>` (control alt F2).
+
 ## App Launcher
 
 ### i3
