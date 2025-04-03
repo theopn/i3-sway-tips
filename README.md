@@ -85,6 +85,19 @@ Make `.Xresources` in your home (`~`) directory and append `Xft.dpi: <DPI-value>
 
 ## External Monitors
 
+i3/Sway creates new workspaces in the current monitor that is focused on.
+Let's suppose workspace 1 is in the left monitor and 2 is in the right monitor, and you are currently focused in the workspace 1.
+If you input `$mod + 3`, i3/Sway will create the workspace 3 in the left monitor.
+If you input `$mod + 2` to focus the right monitor then input `$mod + 3`, the workspace 3 will be created in the right monitor.
+Following keybindings will be helpful in switching workspaces between multiple monitors.
+
+```
+bindsym $mod+Shift+braceright move workspace to output right
+bindsym $mod+Shift+braceleft move workspace to output left
+```
+
+Now, if you are currently in the workspace 1 and input `$mod + Shift + ]`, the workspace 1 will be moved to the left monitor (now the left monitor has both workspace 1 and 2).
+
 ### i3
 
 `xrandr`, which should be installed as a dependency to X11 server, gives you the list of displays. `xrandr --output HDMI-2 --auto --right-of eDP-1` projects the screen to HDMI-2 with the resolution set to auto. You can then execute `i3 move workspace to output right` to move the current workspace to the externam monitor. You can use `--same-as` flag to mirror the display. `xrandr --output HDMI-2 --off` will stop the projection.
