@@ -162,12 +162,17 @@ xenv -event keyboard | egrep -o 'keycode.*\)'
 
 ## Keyboard: Layout Control
 
+For setting up i3/Sway to handle input of non-Roman character, read the next section.
+
 ### i3
 
 `setxkbmap` can be used to configure the keyboard layout.
 
 ```
+# Swapping Ctrl and Capslock
 exec --no-startup-id setxkbmap -option ctrl:swapcaps
+# alt-space toggles between US QWERTY and French AZERTY
+exec --no-startup-id setxkbmap -layout 'us,fr' -option 'grp:alt_space_toggle'
 ```
 
 ### Sway
@@ -177,14 +182,17 @@ Once you get the name or id, you can utilize those to configure a specific devic
 Or you can configure the entire set of a device to behave a certain way.
 
 ```
+# Same setting as setxkbmap example above
 input "type:keyboard" {
+  xkb_layout us,fr
+  xkb_options grp:alt_space_toggle
   xkb_options ctrl:swapcaps
+  
 }
 ```
 
 ## Keyboard: Non-Roman Input
 
-//TODO
 
 ## Network Management
 
