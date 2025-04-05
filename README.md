@@ -162,7 +162,7 @@ xenv -event keyboard | egrep -o 'keycode.*\)'
 
 ## Keyboard: Layout Control
 
-For setting up i3/Sway to handle input of non-Roman character, read the next section.
+For setting up i3/Sway to handle input of non-Roman characters, read the next section.
 
 ### i3
 
@@ -187,12 +187,54 @@ input "type:keyboard" {
   xkb_layout us,fr
   xkb_options grp:alt_space_toggle
   xkb_options ctrl:swapcaps
-  
 }
 ```
 
 ## Keyboard: Non-Roman Input
 
+To input non-Roman characters, you need an input tool such as `ibus` or `fcitx`.
+I will show you the example of setting Korean character (Hangul) input on Fedora using `fcitx5` (setting `ibus` should very similar, as I will indicate in the comments, but I found `ibus-hangul` to be less reliable than `fcitx5-hangul`).
+
+First, install dependencies and configure `fcitx5`:
+
+```sh
+# 1. Install a font
+sudo dnf intall adobe-source-han-sans-kr-fonts
+
+# 2. Install `fcitx5` and Hangul package for it
+sudo dnf install fcitx5 fcitx5-hangul
+#sudo dnf install ibus ibus-hangul
+
+# 3. Use a GUI frontend to configure fcitx5
+#    Add Hangul input and set up keybindings (default Ctrl-SPC)
+fcitx5-configtool
+#ibus-setup
+
+# 4. Launch the daemon. Add it to your i3 config
+fcitx5 -d --replace
+#ibus-daemon --daemonize --xim --replace
+```
+
+Once you installed and configured `fcitx5`, head to your `~/.bash_profile` and export environment variables to let the X11 know what input source to use.
+You can have this in other files such as `~/.xprofile`, `/etc/environment`, or `/etc/profile`, but [`fcitx` wiki recommends `bash_profile`](https://fcitx-im.org/wiki/Setup_Fcitx_5#Login_shell_profile).
+
+```
+$ cat ~/.bash_profile
+...
+
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export SDL_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
+
+# - this variable is only used by the Kitty terminal emulator,
+#   and Kitty only supports ibus
+# - however, fcitx has ibus compatibility,
+#   meaning you can set this (or any other IM_MODULE variables, in fact)
+#   to ibus and still use fcitx as your input source
+export GLFW_IM_MODULE=ibus
+
+```
 
 ## Network Management
 
