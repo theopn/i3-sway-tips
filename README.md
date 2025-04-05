@@ -4,16 +4,12 @@
 
 ## App Launcher
 
-### i3
+- `Dmenu` is the default launcher that comes as a weak dependency of `i3` by many package managers.
+- `Rofi` is a popular launcher that can be themed and take custom input to be used as not only an app launcher but also as a window switcher, power menu, music control, etc.
+    - `rofi -show run` lists all the executable files on the computers, and `rofi -modi drun -show drun` shows only the executables with `.desktop` files.
+    - In Sway, install `rofi-wayland`
 
-`Dmenu` is the default launcher that comes as a weak dependency of `i3` by many package managers.
-`Rofi` is a popular launcher that can be themed and take custom input to be used as not only an app launcher but also as a window switcher, power menu, music control, etc. `rofi -show run` lists all the executable files on the computers, and `rofi -modi drun -show drun` shows only the executables with `.desktop` files.
-
-### Sway
-
-> This tip applies for i3 or other WM as well
-
-You can make a custom launcher using `fzf`. (Inspired by [A Guide to Switching From i3 to Sway](https://luxagraf.net/src/guide-to-switching-i3-to-sway)). This is popular among Sway users who don't want to use `rofi` replacements like `wofi`.
+You can also make a custom launcher using `fzf` (Inspired by [A Guide to Switching From i3 to Sway](https://luxagraf.net/src/guide-to-switching-i3-to-sway)).
 
 ```
 # For i3, replace "swaymsg" with "i3msg"
@@ -26,36 +22,44 @@ for_window [app_id="^launcher$"] floating enable, sticky enable, resize set 30 p
 
 ## Battery Management
 
-If you are installing i3/Sway along with other DEs such as Gnome or KDE, a chance is that it installed `powerprofilesctl` that integrates with DE UI and lets you choose among three power profiles. Type `powerprofilesctl list` to view the current profile setting and available options and `powerprofilesctl set` to choose a profile. Although its `power-saver` option throttles like crazy.
+If you are installing i3/Sway along with other DEs such as Gnome or KDE, a chance is that it installed `powerprofilesctl` that integrates with DE UI and lets you choose among three power profiles.
+Type `powerprofilesctl list` to view the current profile setting and available options and `powerprofilesctl set` to choose a profile.
+Although its `power-saver` option throttles like crazy.
 
-Another solution is `tlp`. `tlp` works great out of the box, so start with `sudo tlp start`. Follow the instruction to disable `powerprofilesctl` and how to add to `systemctl` daemon. Execute `sudo tlp-stat` to see various information, including whether the `tlp` is enabled (the first string `TLP_ENABLE="1"`).
+Another solution is `tlp`.
+`tlp` works great out of the box, so start with `sudo tlp start`.
+Follow the instruction to disable `powerprofilesctl` and how to add to `systemctl` daemon.
+Execute `sudo tlp-stat` to see various information, including whether the `tlp` is enabled (the first string `TLP_ENABLE="1"`).
 
 `powertop` can be installed to give more information about the battery, though I don't know how to interpret the data.
 
 ## Backlight Control
 
-I personally use `brightnessctl`. Keybindings are
+Use `brightnessctl`:
 
 ```
 bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +10%
 bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 10%-
 ```
 
-`light`, `brightlight`, `xbacklight`, and other many programs control the backlight.
+[`light`](https://gitlab.com/dpeukert/light) is a dependency-free package you can use in lieu of `brightnessctl`
 
 ## Bluetooth
 
-Just install `blueman` and type `blueman-manager`.
+Install `blueman` and launch `blueman-manager`.
 
 ## Clipboard Management
 
 ### i3
 
-Nothing much to do. Just install your favorite clipboard manager, whether it's `clipit` or `copyq` and enjoy.
+Install your favorite clipboard manager (`clipit` or `copyq`) and enjoy.
 
 ### Sway
 
-More complicated. You probably want to install `wl-clipboard` just to get the clipboard working. To save a clipboard history, install `clipman` (not XFCE plugin version, one for Wayland). You can start storing clipboard history from `wl-clipboard` by executing `wl-paste -t text --watch clipman store`. To view the clipboard history, you need to send the clipboard history to an external tool. You can do this with `wofi`, with `clipman pick -t wofi`, or my preferred way, utilizing `fzf` and opening it up as a floating window by utilizing the command below.
+You probably want to install `wl-clipboard` to get the clipboard working. To save a clipboard history, install `clipman` (not XFCE plugin version, one for Wayland).
+You can start storing clipboard history from `wl-clipboard` by executing `wl-paste -t text --watch clipman store`.
+To view the clipboard history, you need to send the clipboard history to an external tool.
+You can do this with `wofi`, with `clipman pick -t wofi`, or my preferred way, utilizing `fzf` and opening it up as a floating window by utilizing the command below.
 
 ```
 bindsym <your-key-binding> <choice-of-a-terminal-emulator> --class=clipboard clipman pick --print0 --tool=CUSTOM --tool-args="fzf --prompt 'pick > ' --bind 'tab:up' --cycle --read0"
@@ -67,17 +71,23 @@ for_window [app_id="^clipboard$"] floating enable, sticky enable, resize set 30 
 
 ### i3
 
-X11 server directly draws a window to the display buffer. This is fine for most of the time, but if you're experiencing screen tearing or want to enable transparency/blur, you need to install a compositor. `picom` is a great compositor that works out of the box.
+X11 server directly draws a window to the display buffer.
+This is fine for most of the time, but if you're experiencing screen tearing or want to enable transparency/blur, you need to install a compositor.
+`picom` is a great compositor that works out of the box.
 
 ### Sway
 
-In Wayland, the compositor doubles as a window manager, meaning Sway is Wayland "compositor" that manages the window as well. What does that mean? That means you do not need a separate compositor for transparency to work. Although I found Sway compositing to be limited, transparency for certain applications (Emacs) and rounded corners, blurs, etc are yet to come.
+In Wayland, the compositor doubles as a window manager, meaning Sway is Wayland "compositor" that manages the window as well.
+What does that mean?
+That means you do not need a separate compositor for transparency to work!
+Although I found Sway compositing to be limited, transparency for certain applications (Emacs) and rounded corners, blurs, etc are yet to come.
 
 ## Display Scaling
 
 ### i3
 
-Make `.Xresources` in your home (`~`) directory and append `Xft.dpi: <DPI-value>` (in percentage: e.g., `Xft.dpi: 120` for 120%). Most applications will follow the value specified in the DPI.
+Make `.Xresources` in your home (`~`) directory and append `Xft.dpi: <DPI-value>` (in percentage: e.g., `Xft.dpi: 120` for 120%).
+Most applications will follow the value specified in the DPI.
 
 ### Sway
 
@@ -106,7 +116,11 @@ Fun fact: each monitor will have at least one workspace, so if you move all 10 w
 
 ### i3
 
-`xrandr`, which should be installed as a dependency to X11 server, gives you the list of displays. `xrandr --output HDMI-2 --auto --right-of eDP-1` projects the screen to HDMI-2 with the resolution set to auto. You can then execute `i3 move workspace to output right` to move the current workspace to the externam monitor. You can use `--same-as` flag to mirror the display. `xrandr --output HDMI-2 --off` will stop the projection.
+`xrandr`, which should be installed as a dependency to X11 server, gives you the list of displays.
+`xrandr --output HDMI-2 --auto --right-of eDP-1` projects the screen to HDMI-2 with the resolution set to auto.
+You can then execute `i3 move workspace to output right` to move the current workspace to the externam monitor.
+You can use `--same-as` flag to mirror the display.
+`xrandr --output HDMI-2 --off` will stop the projection.
 
 ### Sway
 
@@ -146,7 +160,7 @@ Install `xenv` and use the following command
 xenv -event keyboard | egrep -o 'keycode.*\)'
 ```
 
-## Keyboard: Switching Control and Caps Lock
+## Keyboard: Layout Control
 
 ### i3
 
@@ -158,13 +172,19 @@ exec --no-startup-id setxkbmap -option ctrl:swapcaps
 
 ### Sway
 
-Execute `swaymsg -t get_inputs` to list the input devices. Once you get the name or id, you can utilize those to configure a specific device. Or you can configure the entire set of a device to behave a certain way.
+Execute `swaymsg -t get_inputs` to list the input devices.
+Once you get the name or id, you can utilize those to configure a specific device.
+Or you can configure the entire set of a device to behave a certain way.
 
 ```
 input "type:keyboard" {
   xkb_options ctrl:swapcaps
 }
 ```
+
+## Keyboard: Non-Roman Input
+
+//TODO
 
 ## Network Management
 
@@ -183,9 +203,13 @@ gammastep -P -l 39.2:-86.5 -t 5600:3500
 
 ## Notification
 
-`Dunst` is a lightweight notification daemon that can be used for both X11 and Wayland. There are many settings you can configure, but it should work well out of the box. To toggle the notification on and off ("Do Not Disturb mode"), execute `dustctl set-paused <true/false/toggle>`. You can also send a kill signal using `#kill -USR<1-to-pause-2-to-resume> $(pidof dunst)`. Note that sending notifications with summary (`notify-send DUNST_COMMAND_PAUSE`) has been removed due to its security (or loack of it).
+`Dunst` is a lightweight notification daemon that can be used for both X11 and Wayland.
+There are many settings you can configure, but it should work well out of the box.
+To toggle the notification on and off ("Do Not Disturb mode"), execute `dustctl set-paused <true/false/toggle>`.
 
-You can send notifications using `notify-send` command. `notify-send` supports REGEX and multi-line notification. Below is a simple Polybar module to display the calendar when clicked.
+You can send notifications using `notify-send` command.
+`notify-send` supports REGEX and multi-line notification.
+Below is a simple Polybar module to display the calendar when clicked.
 
 ```
 [module/date]
@@ -210,7 +234,9 @@ Some GUI application that requires the Polkit authentication framework to work c
 
 ## Pulseaudio/Pipewire Volume Control
 
-It looks like Pipewire, which is now default in Fedora, pretends to be Pulseaudio. It means that `pavucontrol`, a graphical manager for Pulseaudio, and `pactl`, which can be used to control volume, can be used. Below are the i3 keybindings for controlling volume using the hotkeys.
+Pipewire has a frontend for Pulseaudio, so it should work like Pulseaudio for the most part.
+`pavucontrol`, a graphical manager for Pulseaudio, and `pactl`, which can be used to control volume, can be used with Pipewire.
+Below are the i3 keybindings for controlling volume using the hotkeys.
 
 ```
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10%
@@ -223,27 +249,34 @@ bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOU
 
 ### i3
 
-X11 is blessed with a wide selection of screenshot utilities. My favorite is Flameshot. All you need to do is bind `flameshot launcher` to `Print` key or another keybinding of your choice.
+X11 is blessed with a wide selection of screenshot utilities.
+My favorite is Flameshot.
+Bind `flameshot launcher` to `Print` key or another keybinding of your choice.
 
 ### Sway
 
-Wayland does not have many good screenshot tools. One simple and popular solution is using `grim`, a screenshot tool, and `slurp`, a region selector. Bind a key of your choice to `grim -g "$(slurp)"` to take a screenshot of a certain region.
+Wayland does not have many good screenshot tools.
+One simple and popular solution is using `grim`, a screenshot tool, and `slurp`, a region selector.
+Bind a key of your choice to `grim -g "$(slurp)"` to take a screenshot of a certain region.
 
 ## Startup Application
 
 ### i3
 
-You probably know this, but you can use `exec` command in the (preferably) bottom of the i3 configuration to launch commands in the startup. `--no-startup-id` disables startup-notification, which is not supported by some applications (indicated by the cursor hourglass that will hang for 60 seconds).
+You can use `exec` command in the (preferably) bottom of the i3 configuration to launch commands in the startup.
+`--no-startup-id` disables startup-notification, which is not supported by some applications (indicated by the cursor hourglass that will hang for 60 seconds).
 
 ### Sway
 
-The reason why this section exists. Startup ID is not a thing in Wayland, so no need for `--no-startup-id` tag.
+Exactly the same as i3, except startup ID is not a thing in Wayland, so no need for `--no-startup-id` tag.
 
 ## Trackpad Settings
 
 ### i3
 
-`xinput` can be used to list and configure input devices. `xinput list` to list all the input devices, and use `xinput list-props <device-id-or-name>` to list "props" associated with it. Pay close attention to things like "natural scrolling" and "tapping". Below are my i3 exec commands to enable natural scrolling and tapping.
+`xinput` can be used to list and configure input devices.
+`xinput list` to list all the input devices, and use `xinput list-props <device-id-or-name>` to list "props" associated with it.
+Below are my i3 exec commands to enable natural scrolling and tapping.
 
 ```
 set $trackpad_id <trackpad-id-or-name>
@@ -253,7 +286,9 @@ exec --no-startup-id xinput --set-prop $trackpad_id "libinput Natural Scrolling 
 
 ### Sway
 
-Execute `swaymsg -t get_inputs` to list the input devices. Once you get the name or id, you can utilize those to configure a specific device. Or you can configure the entire set of devices to behave a certain way.
+Execute `swaymsg -t get_inputs` to list the input devices.
+Once you get the name or id, you can utilize those to configure a specific device.
+Or you can configure the entire set of devices to behave a certain way.
 
 ```
 input "type:touchpad" {
