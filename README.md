@@ -42,7 +42,23 @@ tuned-adm profile balanced-battery
 Use `powerprofilesctl list` and `powerprofilesctl set` if you are using `ppd`.
 Waybar provides a built-in module for `tuned-ppd` and `ppd` that lets you display the current profile and cycle through different profiles.
 
-`tlp` /* TODO */
+`tlp` dynamically adjust CPU performance and other IO/network settings to save battery life.
+Follow the [installation guide](https://linrunner.de/tlp/installation/index.html) for your distribution.
+
+```sh
+sudo systemctl enable tlp.service
+
+# Get tlp inforation
+tlp-stat -s
+# list all batteries
+sudo tlp-stat -b
+# get the current configuration
+sudo tlp-stat -c
+# view the difference between the defaults and the user config
+tlp-stat --cdiff
+```
+
+Works great out of the box, change `/etc/tlp.conf` based on the [configuration guide](https://linrunner.de/tlp/settings/index.html) as needed.
 
 ## Backlight
 
