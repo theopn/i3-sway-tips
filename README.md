@@ -22,18 +22,29 @@ for_window [app_id="^launcher$"] floating enable, sticky enable, resize set 30 p
 
 ## Battery Management
 
-If you are installing i3/Sway along with other DEs such as Gnome or KDE, a chance is that it installed `powerprofilesctl` that integrates with DE UI and lets you choose among three power profiles.
-Type `powerprofilesctl list` to view the current profile setting and available options and `powerprofilesctl set` to choose a profile.
-Although its `power-saver` option throttles like crazy.
+- `upower -d` can display information about your power inputs/outputs.
+- `powertop` diagnoses power consumption and settings that could potentially save battery life
 
-Another solution is `tlp`.
-`tlp` works great out of the box, so start with `sudo tlp start`.
-Follow the instruction to disable `powerprofilesctl` and how to add to `systemctl` daemon.
-Execute `sudo tlp-stat` to see various information, including whether the `tlp` is enabled (the first string `TLP_ENABLE="1"`).
+There is a couple of tools you can use to manage the battery life of your laptop.
 
-`powertop` can be installed to give more information about the battery, though I don't know how to interpret the data.
+`power-profiles-daemon` (`ppd`) and `tuned-ppd` are both power profile switcher, with `tuned-ppd` being Redhat's `ppd` drop-in replacement.
 
-## Backlight Control
+```sh
+# add tuned-ppd to the systemctl daemon list
+systemctl enable tuned
+
+# lists all available power profiles
+tuned-adm list
+# select a profile (most commonly used defaults are balanced-battery, powersave, and throughput-performance)
+tuned-adm profile balanced-battery
+```
+
+Use `powerprofilesctl list` and `powerprofilesctl set` if you are using `ppd`.
+Waybar provides a built-in module for `tuned-ppd` and `ppd` that lets you display the current profile and cycle through different profiles.
+
+`tlp` /* TODO */
+
+## Backlight
 
 Use `brightnessctl`:
 
@@ -42,30 +53,38 @@ bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +10%
 bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 10%-
 ```
 
-[`light`](https://gitlab.com/dpeukert/light) is a dependency-free package you can use in lieu of `brightnessctl`
+In sway, `--no-startup-id` is not needed and `--locked` option can be used to enable brightness control even when swaylock is active.
+
+```
+bindsym --locked XF86MonBrightnessUp exec brightnessctl set +10%
+bindsym --locked XF86MonBrightnessDown exec brightnessctl set 10%-
+```
 
 ## Bluetooth
 
 Install `blueman` and launch `blueman-manager`.
 
-## Clipboard Management
+## Clipboard History
 
 ### i3
 
-Install your favorite clipboard manager (`clipit` or `copyq`) and enjoy.
+`clipit` or `copyq`.
 
 ### Sway
 
-You probably want to install `wl-clipboard` to get the clipboard working. To save a clipboard history, install `clipman` (not XFCE plugin version, one for Wayland).
-You can start storing clipboard history from `wl-clipboard` by executing `wl-paste -t text --watch clipman store`.
-To view the clipboard history, you need to send the clipboard history to an external tool.
-You can do this with `wofi`, with `clipman pick -t wofi`, or my preferred way, utilizing `fzf` and opening it up as a floating window by utilizing the command below.
+Install `clipman` and add the following the your config.
 
 ```
-bindsym <your-key-binding> <choice-of-a-terminal-emulator> --class=clipboard clipman pick --print0 --tool=CUSTOM --tool-args="fzf --prompt 'pick > ' --bind 'tab:up' --cycle --read0"
-for_window [app_id="^clipboard$"] floating enable, sticky enable, resize set 30 ppt 60 ppt, border pixel 10, move position 1300px 50px
+# record clipboard history
+exec wl-paste -t text --watch clipman store --no-persist
 
+# pick a clipboard content using rofi
+bindsym $mod+Shift+v clipman pick -t rofi
+# reset clipboard history
+bindsym $mod+Shift+r clipman clear --all
 ```
+
+There is currently no good ways to save images or other rich format contents in Wayland.
 
 ## Compositor
 
@@ -78,24 +97,21 @@ This is fine for most of the time, but if you're experiencing screen tearing or 
 ### Sway
 
 In Wayland, the compositor doubles as a window manager, meaning Sway is Wayland "compositor" that manages the window as well.
-What does that mean?
-That means you do not need a separate compositor for transparency to work!
-Although I found Sway compositing to be limited, transparency for certain applications (Emacs) and rounded corners, blurs, etc are yet to come.
 
 ## Display Scaling
 
 ### i3
 
-Make `.Xresources` in your home (`~`) directory and append `Xft.dpi: <DPI-value>` (in percentage: e.g., `Xft.dpi: 120` for 120%).
+Make `.Xresources` in your home (`~`) directory and append `Xft.dpi: <DPI-value>` (e.g., `Xft.dpi: 120` for 120%).
 Most applications will follow the value specified in the DPI.
 
 ### Sway
 
-`swaymsg -t get_outputs`, add `output <output_name> scale <DPI-value>` (in the scale: e.g, `output eDP-1 scale 1.2` for 120%) to your config.
+`swaymsg -t get_outputs`, add `output <output_name> scale <DPI-value>` (e.g, `output eDP-1 scale 1.2` for 120%) to your config.
 
 ## External Monitors
 
-How i3 and Sway manage external monitos:
+How i3 and Sway manage external monitors:
 
 i3/Sway creates new workspaces in the current monitor that is focused on.
 Let's suppose workspace 1 is in the left monitor and 2 is in the right monitor, and you are currently focused in the workspace 1.
@@ -117,15 +133,21 @@ Fun fact: each monitor will have at least one workspace, so if you move all 10 w
 ### i3
 
 `xrandr`, which should be installed as a dependency to X11 server, gives you the list of displays.
-`xrandr --output HDMI-2 --auto --right-of eDP-1` projects the screen to HDMI-2 with the resolution set to auto.
-You can then execute `i3 move workspace to output right` to move the current workspace to the externam monitor.
-You can use `--same-as` flag to mirror the display.
-`xrandr --output HDMI-2 --off` will stop the projection.
+
+- `xrandr --output HDMI-2 --auto --right-of eDP-1` projects the screen to HDMI-2 with the resolution set to auto.
+- You can then execute `i3 move workspace to output right` to move the current workspace to the external monitor.
+- You can use `--same-as` flag to mirror the display.
+- `xrandr --output HDMI-2 --off` will stop the projection.
 
 ### Sway
 
 `swaymsg -t get_outputs` lists all the output devices.
-/* TODO */
+When the monitor connects, Sway automatically turns the monitor on.
+However, there is no easy way to set the absolute position of the monitor like wiht `--right-of`, etc. flag in `xrandr`; you need to know the resolution of the monitors.
+
+- `swaymsg 'output HDMI-2 pos 0 0'` to render `HDMI-2` to the far left
+- `swaymsg 'output eDP-1 pos 0 0'; swaymsg 'output HDMI-2 pos 1920 0` to render `HDMI-2` to the right of `eDP-1`, which has the resolution of 1920 x 1080
+- `swaymsg 'output HDMI-2 toggle` toggles the display
 
 ## Executing Lock before Suspend
 
@@ -140,15 +162,16 @@ xss-lock --transfer-sleep-lock -- <i3-lock-command-that-you-want-to-execute> --n
 ### Sway
 
 `swayidle` is the dependency of `Sway` that can execute commands after a certain time of idle or before a suspension.
+Following command in your configuration locks the machine after 300 seconds, turn off the display after another 300 seconds, and launches swaylock before suspending.
 
 ```
 exec swayidle -w \
-  timeout 300 '<sway-lock-command-to-be-executed>' \
-  timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
-  before-sleep '<sway-lock-command-to-be-executed'
+  timeout 300 'swaylock -f' \
+  timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+  before-sleep 'swaylock -f'
 ```
 
-You can of course customize behavior after idling.
+`swaylock -f` runs swaylock in daemonized mode, which is preferred method to prevent it being triggered multiple times.
 
 ## Keyboard: Getting Keycodes
 
@@ -162,7 +185,7 @@ xenv -event keyboard | egrep -o 'keycode.*\)'
 
 ## Keyboard: Layout Control
 
-For setting up i3/Sway to handle input of non-Roman characters, read the next section.
+For handling the input of non-Roman characters, read the next section.
 
 ### i3
 
@@ -242,14 +265,45 @@ export GLFW_IM_MODULE=ibus
 
 ## Nightlight/Nightshift/Bluelight filter/whatever it's called
 
-In X11, `redshift`, and in Wayland, `gammashift`.
+### i3
+
+`redshift -P`
+
+`-P` tells redshift to reset the current color settings before executing.
+
+Create a configuration file as `~/.config/redshift.conf`
 
 ```
-redshift -P -l 39.2:-86.5 -t 5600:3500 -m randr
-gammastep -P -l 39.2:-86.5 -t 5600:3500
+[redshift]
+temp-day=5600
+temp-night=3500
+gamma=0.8
+adjustment-method=randr
+location-provider=manual
+
+[manual]
+lat=<decimal degree of your loc>
+lon=<decimal degree of your loc>
 ```
 
-`-P` is telling the program to reset the current color settings before executing, `-l` is followed by lattitude:longitude, `-t` is followed by the color temperature for day and night, 6700k is the natural color temperature, and `-m randr` is a certain mode I think.
+### Sway
+
+`gammastep -P`
+
+Create a configuration file as `~/.config/gammastep/config.ini`
+
+```
+[general]
+temp-day=5600
+temp-night=3500
+gamma=0.8
+adjustment-method=wayland
+location-provider=manual
+
+[manual]
+lat=<decimal degree of your loc>
+lon=<decimal degree of your loc>
+```
 
 ## Notification
 
@@ -295,6 +349,8 @@ bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ to
 bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle
 ```
 
+Reference the [backight](#backlight) section for using `--locked` flag for Sway config.
+
 ## Screenshot
 
 ### i3
@@ -305,9 +361,19 @@ Bind `flameshot launcher` to `Print` key or another keybinding of your choice.
 
 ### Sway
 
-Wayland does not have many good screenshot tools.
-One simple and popular solution is using `grim`, a screenshot tool, and `slurp`, a region selector.
-Bind a key of your choice to `grim -g "$(slurp)"` to take a screenshot of a certain region.
+Use `grimshot`
+
+```
+set $screenshot_mode Screenshot MODE: (w) Window (s) Entire screen (a) Area (esc, Return) Exit
+mode "$screenshot_mode" {
+  bindsym w exec grimshot --notify save window; mode "default"
+  bindsym s exec grimshot --notify save screen; mode "default"
+  bindsym a exec grimshot --notify save area; mode "default"
+  bindsym Escape mode "default"
+  bindsym Return mode "default"
+}
+bindsym $mod+Shift+s mode "$screenshot_mode"
+```
 
 ## Startup Application
 
@@ -339,6 +405,8 @@ exec --no-startup-id xinput --set-prop $trackpad_id "libinput Natural Scrolling 
 Execute `swaymsg -t get_inputs` to list the input devices.
 Once you get the name or id, you can utilize those to configure a specific device.
 Or you can configure the entire set of devices to behave a certain way.
+
+Below disables the trackpad while typing, enables tap to click, and enables the natural scrolling.
 
 ```
 input "type:touchpad" {
