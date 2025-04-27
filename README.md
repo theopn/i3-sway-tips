@@ -195,9 +195,20 @@ exec swayidle -w \
 
 Install `xenv` and use the following command
 
-```
+```sh
 xenv -event keyboard | egrep -o 'keycode.*\)'
 ```
+
+### Sway
+
+Run `wev` and look for the output of the following format:
+
+```
+[14:     wl_keyboard] key: serial: 3516; time: 1048491; key: 246; state: 0 (released)
+                      sym: XF86WLAN     (269025173), utf8: ''
+```
+
+If `wev` does not respond with an input, it is likely that Sway already has a keybinding of the key and is hijacking the input.
 
 ## Keyboard: Layout Control
 
