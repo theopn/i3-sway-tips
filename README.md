@@ -288,7 +288,33 @@ export GLFW_IM_MODULE=ibus
 
 ## Network Management
 
-`network-manager-applet`
+With `nmcli`:
+
+```sh
+# lists available networking device
+nmcli device status
+# lists all available wifi
+nmcli d wifi list --rescan yes
+# connects to a wifi (replace $SSID and $PASSWORD)
+nmcli d wifi connect $SSID password $PASSWORD
+# shows the password of the currently connected wifi
+nmcli d wifi show-password
+
+# lists active connection profiles (e.g., all attempted wifi connections)
+nmcli c show
+# switch to another registered connection (e.g., different wifi)
+nmcli c up $CONNECTION_NAME
+# disconnect from connection
+nmcli c down $CONNECTION_NAME
+# delete information associated with the connection
+# this deletes the profile file located in /etc/NetworkManager/system-connections/$SSID.nmconnection
+nmcli c delete $CONNECTION_NAME
+
+# turns wifi device off
+nmcli radio wifi off
+```
+
+You can also install `network-manager-applet` to have a GUI frontend for `nmcli`.
 
 ## Nightlight/Nightshift/Bluelight filter/whatever it's called
 
