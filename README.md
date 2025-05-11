@@ -189,6 +189,17 @@ exec swayidle -w \
 
 `swaylock -f` runs swaylock in daemonized mode, which is preferred method to prevent it being triggered multiple times.
 
+## Flatpak Issues
+
+Not being able to open links in some Flatpak apps (running under XWayland) in Sway:
+
+1. Make sure you have `xdg-desktop-portal` and `xdg-desktop-portal-gtk` installed and running with `systemctl --user start xdg-desktop-portal xdg-desktop-portal-gtk`
+2. Check the logs with `systemctl --user status xdg-desktop-portal`
+3. If you have `Error: no DISPLAY environment variable specified`, this is because `xdg-desktop-portal` service did not inherit the `DISPLAY` variable, which is necessary to launch Firefox
+4. Check the list of `systemctl` environment variables with `systemctl --user show-environment`
+5. Export the variable with `dbus-update-activation-environment --systemd DISPLAY`
+6. Restart the `xdg-desktop-portal` with `systemctl --user restart xdg-desktop-portal`
+
 ## Keyboard: Getting Keycodes
 
 ### i3
@@ -388,6 +399,10 @@ The number of notification to be saved is controled by `history_length` variable
 
 Some GUI application that requires the Polkit authentication framework to work correctly (e.g., Fedora Media Writer) neeeds Polkit frontend installed.
 `lxpolkit` is a lightweight one you can use.
+
+## Printer
+
+`CUPS` //TODO
 
 ## Pulseaudio/Pipewire Volume Control
 
