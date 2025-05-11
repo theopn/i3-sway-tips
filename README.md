@@ -402,7 +402,8 @@ Some GUI application that requires the Polkit authentication framework to work c
 
 ## Printer
 
-`CUPS` //TODO
+`cups` is the way to go.
+Install and start `cups`, open `http://localhost:631/`, and you can easily manage printers in the "Administration" tab.
 
 ## Pulseaudio/Pipewire Volume Control
 
