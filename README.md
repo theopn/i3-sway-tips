@@ -113,6 +113,7 @@ This is fine for most of the time, but if you're experiencing screen tearing or 
 ### Sway
 
 In Wayland, the compositor doubles as a window manager, meaning Sway is Wayland "compositor" that manages the window as well.
+For transparency, blur, and other "eye candies," take a look at [swayfx](https://github.com/WillPower3309/swayfx), a fork of Sway with extra UI options.
 
 ## Display Scaling
 
@@ -165,15 +166,22 @@ However, there is no easy way to set the absolute position of the monitor like w
 - `swaymsg 'output eDP-1 pos 0 0'; swaymsg 'output HDMI-2 pos 1920 0` to render `HDMI-2` to the right of `eDP-1`, which has the resolution of 1920 x 1080
 - `swaymsg 'output HDMI-2 toggle` toggles the display
 
-## Executing Lock before Suspend
+## Flatpak Issues
+
+Not being able to open links in some Flatpak apps (running under XWayland) in Sway:
+
+1. Make sure you have `xdg-desktop-portal` and `xdg-desktop-portal-gtk` installed and running with `systemctl --user start xdg-desktop-portal xdg-desktop-portal-gtk`
+2. Check the logs with `systemctl --user status xdg-desktop-portal`
+3. If you have `Error: no DISPLAY environment variable specified`, this is because `xdg-desktop-portal` service did not inherit the `DISPLAY` variable, which is necessary to launch Firefox
+4. Check the list of `systemctl` environment variables with `systemctl --user show-environment`
+5. Export the variable with `dbus-update-activation-environment --systemd DISPLAY`
+6. Restart the `xdg-desktop-portal` with `systemctl --user restart xdg-desktop-portal`
+
+## Idle Action
 
 ### i3
 
-`xss-lock` can automatically execute a command before suspending.
-
-```
-xss-lock --transfer-sleep-lock -- <i3-lock-command-that-you-want-to-execute> --nofork
-```
+//TODO
 
 ### Sway
 
@@ -187,20 +195,7 @@ exec swayidle -w \
   before-sleep 'swaylock -f'
 ```
 
-`swaylock -f` runs swaylock in daemonized mode, which is preferred method to prevent it being triggered multiple times.
-
-## Flatpak Issues
-
-Not being able to open links in some Flatpak apps (running under XWayland) in Sway:
-
-1. Make sure you have `xdg-desktop-portal` and `xdg-desktop-portal-gtk` installed and running with `systemctl --user start xdg-desktop-portal xdg-desktop-portal-gtk`
-2. Check the logs with `systemctl --user status xdg-desktop-portal`
-3. If you have `Error: no DISPLAY environment variable specified`, this is because `xdg-desktop-portal` service did not inherit the `DISPLAY` variable, which is necessary to launch Firefox
-4. Check the list of `systemctl` environment variables with `systemctl --user show-environment`
-5. Export the variable with `dbus-update-activation-environment --systemd DISPLAY`
-6. Restart the `xdg-desktop-portal` with `systemctl --user restart xdg-desktop-portal`
-
-## Keyboard: Getting Keycodes
+## Keyboard: Keycodes
 
 ### i3
 
@@ -221,7 +216,7 @@ Run `wev` and look for the output of the following format:
 
 If `wev` does not respond with an input, it is likely that Sway already has a keybinding of the key and is hijacking the input.
 
-## Keyboard: Layout Control
+## Keyboard: Layout
 
 For handling the input of non-Roman characters, read the next section.
 
@@ -296,6 +291,30 @@ export XMODIFIERS=@im=fcitx
 export GLFW_IM_MODULE=ibus
 
 ```
+
+## Lock before Suspend
+
+### i3
+
+`xss-lock` can automatically execute a command before suspending.
+
+```
+xss-lock --transfer-sleep-lock -- <i3-lock-command-that-you-want-to-execute> --nofork
+```
+
+### Sway
+
+`swayidle` has an option to execute a command before sleep.
+Read [Idle Action](#idle-action) section for more information.
+
+```
+exec swayidle -w \
+  timeout 300 'swaylock -f' \
+  timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+  before-sleep 'swaylock -f'
+```
+
+`swaylock -f` runs swaylock in daemonized mode, which is preferred method to prevent it being triggered multiple times.
 
 ## Network Management
 
