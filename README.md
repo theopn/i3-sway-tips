@@ -177,7 +177,7 @@ Not being able to open links in some Flatpak apps (running under XWayland) in Sw
 5. Export the variable with `dbus-update-activation-environment --systemd DISPLAY`
 6. Restart the `xdg-desktop-portal` with `systemctl --user restart xdg-desktop-portal`
 
-## Idle Action
+## Idle Action & Idle Inhibit when Watching Video
 
 ### i3
 
@@ -194,6 +194,37 @@ exec swayidle -w \
   timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
   before-sleep 'swaylock -f'
 ```
+
+You might notice that `swayidle` is being invoked even when you are watching videos in a browser.
+It is because web browsers send dbus `org.freedesktop.ScreenSaver` messages and not systemd logind idle inhibit messages, and Swayidle only listens to the latter.
+
+Manual workarounds without external dependencies:
+
+- Add an idle inhibitor module to Waybar
+    ```json
+    "idle_inhibitor": {
+      "format": "{icon}",
+      "format-icons": {
+          "activated": "󰅶 ",
+          "deactivated": "󰾪 "
+      },
+      "tooltip-format-activated": "CAFFEINATED",
+      "tooltip-format-deactivated": "not caffeinated",
+    },
+    ```
+    It uses [idle-inhibit-unstable-v1 protocol](https://wayland.app/protocols/idle-inhibit-unstable-v1) ([source](https://github.com/Alexays/Waybar/blob/master/src/modules/idle_inhibitor.cpp)), if you are interested
+- Set idle inhibit rule for full screen application
+    ```
+    for_window [app_id="firefox"] inhibit_idle fullscreen
+    # or make it any full screen window
+    for_window [shell=".*"] inhibit_idle fullscreen
+    ```
+
+Choose one of the following programs for a more complete solution:
+
+- [sd-inhibit-bridge](https://github.com/notpeelz/sd-inhibit-bridge) or [idlehack](https://github.com/loops/idlehack) to transfer dbus signals to systemd signals
+- [SwayAudioIdleInhibit](https://github.com/ErikReider/SwayAudioIdleInhibit) to prevent `swayidle` when an application is outputting or receiving audio
+
 
 ## Keyboard: Keycodes
 
